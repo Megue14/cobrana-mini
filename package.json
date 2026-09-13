@@ -1,0 +1,13 @@
+{
+  "name": "cobrana-mini",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cobrana - trimmed-down copy of the platform used for technical sessions",
+  "scripts": {
+    "start": "node start.js",
+    "test": "node --test \"backend-business/test/*.test.js\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

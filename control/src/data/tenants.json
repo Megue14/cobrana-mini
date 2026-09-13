@@ -1,0 +1,36 @@
+{
+  "tnt_sanmartin": {
+    "id": "tnt_sanmartin",
+    "name": "Colegio San Martin",
+    "subdomain": "sanmartin",
+    "status": "ACTIVE",
+    "commercialPlan": "STANDARD",
+    "commissionRate": 0.01,
+    "enabledPaymentMethods": ["CASHPOINT", "PAGOYA", "MONARCA"],
+    "limits": {
+      "maxOpenChargesPerCustomer": 3,
+      "maxChargeAmount": 20000
+    },
+    "settlement": {
+      "plan": "H48_W24",
+      "payoutDayOfWeek": 2
+    }
+  },
+  "tnt_clinicavida": {
+    "id": "tnt_clinicavida",
+    "name": "Clinica Vida",
+    "subdomain": "clinicavida",
+    "status": "ACTIVE",
+    "commercialPlan": "PRO",
+    "commissionRate": 0.009,
+    "enabledPaymentMethods": ["CASHPOINT", "MONARCA", "EXTERNAL"],
+    "limits": {
+      "maxOpenChargesPerCustomer": 5,
+      "maxChargeAmount": 50000
+    },
+    "settlement": {
+      "plan": "SAME_DAY",
+      "payoutDayOfWeek": null
+    }
+  }
+}

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cobrana - Merchant panel</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">COBRANA</div>
+      <nav>
+        <a class="nav-item" href="#/" data-route="/">Dashboard</a>
+        <a class="nav-item" href="#/charges" data-route="/charges">Charges</a>
+        <a class="nav-item" href="#/my-commerce" data-route="/my-commerce">My commerce</a>
+      </nav>
+      <div class="sidebar-foot">
+        <label for="tenant">Signed in as</label>
+        <select id="tenant">
+          <option value="tnt_sanmartin">Colegio San Martin</option>
+          <option value="tnt_clinicavida">Clinica Vida</option>
+        </select>
+      </div>
+    </aside>
+
+    <div class="content">
+      <main id="view" class="view"></main>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
