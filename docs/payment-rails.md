@@ -24,21 +24,14 @@ merchant out on their settlement schedule.
 
 ## Gateway rail - MONARCA, EXTERNAL
 
-1. The merchant creates a charge. Nothing goes to the provider yet: the charge
-   gets a payment link and that is all.
+1. The merchant creates a charge in the panel. The charge gets a payment link.
 2. The merchant passes the link to their customer - in person, over WhatsApp,
    printed on the invoice, however that merchant works.
-3. The customer opens the link. That is when we open an order with the
-   provider, through control, and the customer is sent to the provider's
+3. The customer opens the link. The business backend asks control to open an
+   order with the provider, and the customer is sent to the provider's
    checkout page to enter their card.
 4. The provider posts a notification to control, which forwards it to the
    business backend. The charge moves to PAID there.
-
-The charge and the order at the provider are not the same object on this rail.
-A customer who gets declined and tries again goes through step 3 again, so one
-charge can leave several orders behind at the provider and only one of them
-settles it. On the service rail there is no such gap: the charge and the order
-holding its payment code are created together and voided together.
 
 `EXTERNAL` is the case where the merchant holds their own gateway
 certification. We proxy to a service they run, the money settles into their own
@@ -46,19 +39,13 @@ merchant account, and those charges carry no Cobrana commission.
 
 ## Creating a charge
 
-Both rails start the same way: the panel calls the business backend, which
-writes the charge. Where they split is whether the provider hears about it.
+The panel calls the business backend, which writes the charge.
 
-On the service rail the business backend asks control to open the order right
-away, and control talks to the provider - control holds the credentials,
-nothing else speaks to a provider. We send tenant, amount, concept, customer
-and expiresAt, and the provider answers with the `paymentCode` we store on the
-charge.
-
-On the gateway rail nothing is sent to the provider at creation time. The
-charge gets a `paymentLink` and waits for someone to open it; the same request
-to control happens then instead, and what comes back is the URL to redirect
-to.
+Anything that reaches a provider goes through control: the business backend
+asks control, control talks to the provider. Control holds the credentials;
+nothing else speaks to a provider. The body is tenant, amount, concept,
+customer and expiresAt. A service provider answers with a `paymentCode`, a
+gateway with the URL to send the payer to.
 
 ## What each rail reports
 
@@ -115,12 +102,9 @@ charge stays open.
 A charge that has not been paid can be cancelled from the panel, and it moves
 to `CANCELLED`. A paid charge cannot be cancelled.
 
-On the service rail the provider is holding an order for it, so the business
-backend asks control to void it. The payment code stays on our record after
-that - the order is voided at the provider, not deleted here.
-
-On the gateway rail there is no order to void: the link stops opening new ones
-because the charge is no longer payable.
+If an order is open for it, the business backend asks control to void it and
+control tells the provider. The payment code stays on our record after that -
+the order is voided at the provider, not deleted here.
 
 ## Notifications get lost
 
