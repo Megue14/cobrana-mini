@@ -54,7 +54,7 @@ function customerIndex(customers) {
 
 function chargeReference(charge) {
   if (charge.paymentCode) return `<code>${esc(charge.paymentCode)}</code>`;
-  if (charge.paymentLink) return `<a class="link" href="${esc(charge.paymentLink)}" target="_blank" rel="noreferrer">Checkout link</a>`;
+  if (charge.paymentLink) return `<a class="link" href="${esc(charge.paymentLink)}" target="_blank" rel="noreferrer">Payment link</a>`;
   return '<span class="hint">&mdash;</span>';
 }
 
@@ -68,6 +68,9 @@ function chargeRows(charges, names) {
       <td>${chargeReference(charge)}</td>
       <td class="right">${money(charge.amount)}</td>
       <td><span class="tag ${esc(charge.status)}">${esc(charge.status)}</span></td>
+      <td class="right">${charge.status === 'PENDING'
+        ? `<button class="linkbtn" data-cancel="${esc(charge.id)}">Cancel</button>`
+        : ''}</td>
     </tr>
   `).join('');
 }
@@ -125,13 +128,30 @@ async function dashboardPage() {
         <thead>
           <tr>
             <th>Charge</th><th>Customer</th><th>Concept</th><th>Method</th>
-            <th>Reference</th><th class="right">Amount</th><th>Status</th>
+            <th>Reference</th><th class="right">Amount</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody>${chargeRows(recent, names)}</tbody>
       </table>`}
     </div>
   `;
+
+  bindCancelButtons(dashboardPage);
+}
+
+function bindCancelButtons(reload) {
+  view.querySelectorAll('[data-cancel]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        await post(`/charges/${button.dataset.cancel}/cancel`, { tenantId: tenantId() });
+        await reload();
+      } catch (err) {
+        button.disabled = false;
+        window.alert(err.message);
+      }
+    });
+  });
 }
 
 let chargeFilter = 'ALL';
@@ -170,13 +190,15 @@ async function chargesPage() {
         <thead>
           <tr>
             <th>Charge</th><th>Customer</th><th>Concept</th><th>Method</th>
-            <th>Reference</th><th class="right">Amount</th><th>Status</th>
+            <th>Reference</th><th class="right">Amount</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody>${chargeRows(visible, names)}</tbody>
       </table>`}
     </div>
   `;
+
+  bindCancelButtons(chargesPage);
 
   view.querySelectorAll('[data-filter]').forEach((chip) => {
     chip.addEventListener('click', () => {

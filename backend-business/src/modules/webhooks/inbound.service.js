@@ -50,6 +50,14 @@ function handleServiceNotification(provider, notification, store = defaultStore)
   if (charge.status === 'PAID') {
     return { chargeId: charge.id, chargeStatus: charge.status, alreadySettled: true };
   }
+  if (charge.status === 'CANCELLED') {
+    return {
+      chargeId: charge.id,
+      chargeStatus: 'CANCELLED',
+      alreadySettled: false,
+      anomaly: 'payment_reported_for_cancelled_charge',
+    };
+  }
 
   settle(charge, notification.paidAt || new Date().toISOString(), store);
   return { chargeId: charge.id, chargeStatus: 'PAID', alreadySettled: false };
@@ -106,17 +114,21 @@ function handleGatewayNotification(provider, notification, store = defaultStore)
     processedAt,
   });
 
-  if (status === 'APPROVED' && charge.status !== 'PAID') {
+  if (status === 'APPROVED' && charge.status === 'PENDING') {
     settle(charge, processedAt, store);
   }
 
-  return {
+  const result = {
     chargeId: charge.id,
     transactionId: notification.transactionId,
     transactionStatus: status,
     chargeStatus: store.findCharge(charge.id).status,
     alreadyProcessed: false,
   };
+  if (status === 'APPROVED' && result.chargeStatus === 'CANCELLED') {
+    result.anomaly = 'payment_reported_for_cancelled_charge';
+  }
+  return result;
 }
 
 module.exports = { handleServiceNotification, handleGatewayNotification };

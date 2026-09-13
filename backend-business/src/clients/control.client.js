@@ -23,8 +23,9 @@ async function getBillingConfig(tenantId) {
 }
 
 /**
- * Creating a charge means creating an order with the provider, and control is
- * the only thing that talks to providers.
+ * Opening an order with the provider. Control is the only thing that talks to
+ * providers; when this is called depends on the rail - see
+ * docs/payment-rails.md.
  */
 async function createProviderOrder(provider, order) {
   const response = await fetch(`${CONTROL_BASE_URL}/internal/providers/${provider}/orders`, {
@@ -41,4 +42,16 @@ async function createProviderOrder(provider, order) {
   return response.json();
 }
 
-module.exports = { getBillingConfig, createProviderOrder };
+/** Cancelling a charge means voiding the order the provider is holding. */
+async function voidProviderOrder(provider, providerOrderId) {
+  const response = await fetch(
+    `${CONTROL_BASE_URL}/internal/providers/${provider}/orders/${providerOrderId}/void`,
+    { method: 'POST' },
+  );
+  if (!response.ok) {
+    throw new AppError('provider_void_failed', 'The provider did not void the order', 502);
+  }
+  return response.json();
+}
+
+module.exports = { getBillingConfig, createProviderOrder, voidProviderOrder };

@@ -121,6 +121,14 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
 .tag { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
 .tag.PAID { background: var(--good-bg); color: var(--good-ink); }
 .tag.PENDING { background: var(--wait-bg); color: var(--wait-ink); }
+.tag.CANCELLED { background: #f1f5f9; color: #64748b; }
+
+.linkbtn {
+  background: none; border: none; padding: 0;
+  color: var(--muted); font-size: 13px; text-decoration: underline; cursor: pointer;
+}
+.linkbtn:hover { color: #b42318; }
+.linkbtn:disabled { opacity: .4; cursor: default; }
 
 .rail-pill { font-size: 11px; color: var(--muted); border: 1px solid var(--line); padding: 2px 8px; border-radius: 999px; }
 

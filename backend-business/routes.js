@@ -19,6 +19,15 @@ async function handleApiRequest(req, res) {
     if (req.method === 'POST' && path === '/api/charges') {
       return json(res, 201, await charges.create(await readBody(req)));
     }
+    // What the hosted payment page calls when the payer opens the link.
+    const startCheckout = path.match(/^\/api\/charges\/([^/]+)\/checkout$/);
+    if (req.method === 'POST' && startCheckout) {
+      return json(res, 200, await charges.checkout(startCheckout[1]));
+    }
+    const cancelCharge = path.match(/^\/api\/charges\/([^/]+)\/cancel$/);
+    if (req.method === 'POST' && cancelCharge) {
+      return json(res, 200, await charges.cancel(cancelCharge[1], await readBody(req)));
+    }
     if (req.method === 'GET' && path === '/api/customers') {
       return json(res, 200, customers.list(url));
     }

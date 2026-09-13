@@ -59,6 +59,15 @@ async function handleRequest(req, res) {
     return json(res, 201, created);
   }
 
+  const voidOrder = path.match(/^\/internal\/providers\/([^/]+)\/orders\/([^/]+)\/void$/);
+  if (req.method === 'POST' && voidOrder) {
+    const provider = providersService.getProvider(voidOrder[1]);
+    if (!provider) return json(res, 404, { error: { code: 'unknown_provider', provider: voidOrder[1] } });
+
+    const result = await providerClient.voidOrder(provider, voidOrder[2]);
+    return json(res, 200, result);
+  }
+
   if (req.method === 'GET' && path === '/internal/providers') {
     return json(res, 200, { providers: Object.values(providersService.providers) });
   }

@@ -15,4 +15,12 @@ async function create(body) {
   return service.createCharge(body);
 }
 
-module.exports = { list, create };
+async function checkout(chargeId) {
+  return service.startCheckout(chargeId);
+}
+
+async function cancel(chargeId, body) {
+  return service.cancelCharge(chargeId, body.tenantId);
+}
+
+module.exports = { list, create, checkout, cancel };

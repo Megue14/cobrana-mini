@@ -4,8 +4,8 @@
  * Provider integrations.
  *
  * Control holds the credentials and speaks each provider's API. What comes
- * back is not the same on both rails: a service provider returns a payment
- * code, a gateway returns a link to its checkout page.
+ * back is not the same on both rails: a service provider returns the payment
+ * code the payer will type, a gateway returns the URL to send the payer to.
  *
  * Stubbed here - the real client signs and posts to the provider.
  */
@@ -43,4 +43,12 @@ async function createOrder(provider, order) {
   };
 }
 
-module.exports = { createOrder };
+async function voidOrder(provider, providerOrderId) {
+  return {
+    providerOrderId,
+    status: 'VOIDED',
+    voidedAt: new Date().toISOString(),
+  };
+}
+
+module.exports = { createOrder, voidOrder };

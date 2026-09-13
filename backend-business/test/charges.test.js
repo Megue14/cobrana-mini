@@ -10,13 +10,14 @@ const { createCharge, listCharges } = require('../src/modules/charges/charges.se
  * Control is faked through the defaulted last parameter - see CONVENTIONS.md.
  * Nothing in production passes it.
  */
+const ordersOpened = [];
+
 const fakeControl = {
   async createProviderOrder(provider, order) {
-    const gateway = provider === 'MONARCA' || provider === 'EXTERNAL';
+    ordersOpened.push(provider);
     return {
       providerOrderId: 'ord_test_1',
-      paymentCode: gateway ? null : '123456',
-      paymentLink: gateway ? 'https://checkout.test.pe/abc' : null,
+      paymentCode: '123456',
       expiresAt: order.expiresAt,
     };
   },
@@ -31,7 +32,10 @@ const fakeControl = {
   },
 };
 
-test.beforeEach(() => store.reset());
+test.beforeEach(() => {
+  store.reset();
+  ordersOpened.length = 0;
+});
 
 test('creates a service-rail charge with a payment code', async () => {
   const charge = await createCharge({
@@ -61,6 +65,32 @@ test('gateway charges get a payment link instead of a code', async () => {
 
   assert.equal(charge.paymentCode, null);
   assert.match(charge.paymentLink, /^https:\/\//);
+});
+
+test('creating a gateway charge does not open anything at the provider', async () => {
+  const charge = await createCharge({
+    tenantId: 'tnt_sanmartin',
+    customerId: 'cus_002',
+    amount: 2000,
+    concept: 'Matricula',
+    paymentMethod: 'MONARCA',
+  }, store, fakeControl);
+
+  assert.equal(charge.providerOrderId, null);
+  assert.deepEqual(ordersOpened, []);
+});
+
+test('creating a service charge opens the order right away', async () => {
+  const charge = await createCharge({
+    tenantId: 'tnt_sanmartin',
+    customerId: 'cus_002',
+    amount: 1500,
+    concept: 'Pension abril',
+    paymentMethod: 'CASHPOINT',
+  }, store, fakeControl);
+
+  assert.equal(charge.providerOrderId, 'ord_test_1');
+  assert.deepEqual(ordersOpened, ['CASHPOINT']);
 });
 
 test('rejects a non-integer amount', async () => {

@@ -25,7 +25,7 @@ const RAILS = [
   {
     code: 'GATEWAY',
     name: 'Gateway',
-    description: 'The customer is sent to a hosted checkout page and pays there.',
+    description: 'We generate a payment link. The customer opens it and pays on a checkout page.',
     methods: GATEWAY_METHODS,
   },
 ];

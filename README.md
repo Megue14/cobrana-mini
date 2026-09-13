@@ -10,25 +10,29 @@ code.
 
 ## Architecture
 
-Three tiers. Requests flow strictly inward:
+Three tiers plus the providers:
 
 ```
-  frontend  ---->  backend-business  ---->  control
-  (tenant panel)   (tenant-scoped API)      (platform data)
+  outbound   frontend -> backend-business -> control -> provider
+  inbound                backend-business <- control <- provider
 ```
 
 - **`frontend/`** - the panel each merchant logs into. Talks **only** to the
   business backend.
 - **`backend-business/`** - the single API the frontend calls. Owns everything
   scoped to one tenant: charges, customers, reports. When it needs something
-  platform-level it proxies to control.
+  platform-level, or anything from a provider, it goes through control.
 - **`control/`** - the control plane. Owns tenants, their commercial plan,
-  their limits and their provider configuration.
+  their limits, and the provider integrations. It is the only thing that talks
+  to a provider, in either direction.
 
 **The frontend cannot and must not reach control directly.** It is not exposed
 publicly in production, and anything the panel needs from it goes through the
 business backend. `backend-business/src/clients/control.client.js` is how that
 call is made.
+
+Provider notifications come back the other way: the provider posts to control,
+and control forwards them to the business backend, which owns the charge.
 
 ## Tenancy
 
@@ -56,6 +60,11 @@ curl "http://localhost:3000/api/my-commerce?tenantId=tnt_sanmartin"
 curl -X POST http://localhost:3000/api/charges \
   -H 'content-type: application/json' \
   -d '{"tenantId":"tnt_sanmartin","customerId":"cus_001","amount":1500,"concept":"Pension marzo","paymentMethod":"CASHPOINT"}'
+
+# cancel a charge that has not been paid
+curl -X POST http://localhost:3000/api/charges/chg_1004/cancel \
+  -H 'content-type: application/json' \
+  -d '{"tenantId":"tnt_sanmartin"}'
 
 # providers post to control. Service rail - reported at charge level:
 curl -X POST http://localhost:3001/webhooks/providers/CASHPOINT \

@@ -14,19 +14,15 @@ Both backends use the same Postgres instance: one control database plus one
 database per tenant.
 
 ```
-  browser -> frontend (S3 + CloudFront)
-                 |
-                 v
-          backend-business (EC2) <---+
-                 |                   |
-                 v                   | provider notifications
-           control (EC2) <--------- providers
+  outbound   browser -> frontend -> backend-business -> control -> provider
+  inbound                          backend-business <- control <- provider
 ```
 
-The panel calls the business backend, and the business backend calls control
-for anything platform-level. Provider notifications go the other way: they land
-on control, which owns the provider integrations, and control forwards them to
-the business backend, which owns the charge.
+Outbound: the panel calls the business backend, and the business backend calls
+control for anything platform-level or for anything that has to reach a
+provider. Inbound: provider notifications land on control, which owns the
+integrations, and control forwards them to the business backend, which owns the
+charge.
 
 ## Lambdas
 
